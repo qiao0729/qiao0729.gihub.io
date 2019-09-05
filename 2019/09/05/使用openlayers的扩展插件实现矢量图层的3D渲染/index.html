@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>使用openlayers的扩展插件实现矢量图层的3D渲染 | Hexo</title>
+  <meta name="author" content="John Doe">
+
+  
+  <meta name="description" content="@使得openlayers二维地图上的矢量图层具有3D效果
+openlayers简介openlayers是一个用于开发WebGIS的客户端的JavaScript包，主要负责GIS数据的展示和交互。在操作方面，OpenLayers 除了可以在浏览器中帮助开发者实现地图浏览的基本效果，比如放大（Zoom">
+  
+
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用openlayers的扩展插件实现矢量图层的3D渲染">
+  <meta property="og:site_name" content="Hexo">
+
+  
+  
+
+  
+    <meta property="og:image" content>
+  
+
+  
+  <link href="/css/images/favicon.ico" rel="icon">
+  
+
+  <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+
+</head>
+</html>
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Hexo</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:49:24.598Z"><a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title">使用openlayers的扩展插件实现矢量图层的3D渲染</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>@使得openlayers二维地图上的矢量图层具有3D效果</p>
+<h1 id="openlayers简介"><a href="#openlayers简介" class="headerlink" title="openlayers简介"></a>openlayers简介</h1><p>openlayers是一个用于开发WebGIS的客户端的JavaScript包，主要负责GIS数据的展示和交互。在操作方面，OpenLayers 除了可以在浏览器中帮助开发者实现地图浏览的基本效果，比如放大（Zoom In）、缩小（Zoom Out）、平移（Pan）等常用操作之外，还可以进行选取面、选取线、要素选择、图层叠加等不同的操作，甚至可以对已有的OpenLayers 操作和数据支持类型进行扩充，为其赋予更多的功能。例如，它可以为OpenLayers 添加网络处理服务WPS 的操作接口，从而利用已有的空间分析处理服务来对加载的地理空间数据进行计算。同时，在OpenLayers提供的类库当中，它还使用了类库Prototype.js 和Rico 中的部分组件，为地图浏览操作客户端增加Ajax 效果。openlayers是二维的，有旋转的功能，但是没有倾斜的功能，所以在openlayers中让图层倾斜，呈现类似于高德地图和百度地图那样的三维效果实现不了。<br>        <a href="https://openlayers.org/" target="_blank" rel="noopener">openlayers官网链接</a></p>
+<h2 id="openlayersde扩展插件——ol-ext"><a href="#openlayersde扩展插件——ol-ext" class="headerlink" title="openlayersde扩展插件——ol-ext"></a>openlayersde扩展插件——ol-ext</h2><p>ol-ext是一个很cool的openlayers扩展插件。它是一个与openlayers一起使用的具有扩展，控制，交互等功能的一个插件。在用openlayers进行WebGIS的开发过程中遇到一个问题——让加载在openlayers中的一个矢量图层具有立体效果，而不只是一个二维平面。找了非常多的方法，都不能实现，最后找到了这个插件，可以很好的实现，所以写这篇博客希望可以为有此需求的小伙伴解决问题。openlayers还有一些其他的扩展插件，小伙伴们也可以自行百度了解其他相关的插件。也可以看看以下这篇博客<a href="https://blog.csdn.net/weixin_40184249/article/details/80726606" target="_blank" rel="noopener">openlayer扩展插件</a><br><a href="http://viglino.github.io/ol-ext/doc/doc-pages/" target="_blank" rel="noopener">ol-ext官网</a></p>
+<h2 id="ol-ext实现矢量图层的3D渲染"><a href="#ol-ext实现矢量图层的3D渲染" class="headerlink" title="ol-ext实现矢量图层的3D渲染"></a>ol-ext实现矢量图层的3D渲染</h2><p>以下是ol-ext官网中的一个示例，我进行了一部分改动，有需要实现类似效果的小伙伴也可以去ol-ext官网进行更加深入的学习<br><a href="https://github.com/Viglino/ol-ext" target="_blank" rel="noopener">ol-ext</a><br><a href="https://viglino.github.io/ol-ext/examples/map/map.layer.3D.html" target="_blank" rel="noopener">该示例的完整代码</a></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">DOCTYPE</span> <span class="attr">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">	Copyright wangQiaoZi 2019-08-15 </span></span><br><span class="line"><span class="comment">--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">title</span>&gt;</span>Layer 3D<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"2.5D/3D buildings on an OL3 map"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"keywords"</span> <span class="attr">content</span>=<span class="string">"ol3, layer, vector, 3D, buildings, animation"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">&lt;!-- jQuery --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"https://code.jquery.com/jquery-1.11.0.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">&lt;!-- Openlayers --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"https://openlayers.org/en/latest/css/ol.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"https://openlayers.org/en/latest/build/ol.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">&lt;!-- ol-ext --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"../../dist/ol-ext.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"../../dist/ol-ext.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"../style.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">		#map </span><br><span class="line">		&#123;	position:fixed;</span><br><span class="line">			top: 4em;</span><br><span class="line">			left: 0;</span><br><span class="line">			right:0;</span><br><span class="line">			bottom:0;</span><br><span class="line">			margin:0;</span><br><span class="line">		&#125;</span><br><span class="line">	<span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> &gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">h1</span>&gt;</span>Layer 3D<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!-- DIV pour la carte --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"map"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line">	// The map</span><br><span class="line">	var map = new ol.Map(&#123;	</span><br><span class="line">            target: 'map',</span><br><span class="line">			view: new ol.View(&#123;	</span><br><span class="line">                zoom: 19,</span><br><span class="line">				center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]</span><br><span class="line">			&#125;),</span><br><span class="line">			//interactions: ol.interaction.defaults(),</span><br><span class="line">			layers: [ new ol.layer.Tile(&#123; name:"OSM", source: new ol.source.OSM() &#125;)]</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">	// Create layer</span><br><span class="line">	var vectorSource = new ol.source.Vector(</span><br><span class="line">	&#123;	url: '../data/ignf.json',</span><br><span class="line">		projection: 'EPSG:3857',</span><br><span class="line">		format: new ol.format.GeoJSON()</span><br><span class="line">	&#125;);</span><br><span class="line">	var vector = new ol.layer.Vector(</span><br><span class="line">		&#123;	source: vectorSource,</span><br><span class="line">		&#125;);</span><br><span class="line">	map.addLayer(vector);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	// Set 3D renderer</span><br><span class="line">	var r3D = new ol.render3D(&#123; height:10, defaultHeight:3.5 &#125;);</span><br><span class="line">	vector.setRender3D(r3D);</span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>效果图：<br><img src="https://img-blog.csdnimg.cn/2019081511213936.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">Recent Posts</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">使用openlayers的扩展插件实现矢量图层的3D渲染</a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Win7系统中如何启用Internet信息服务（IIS）/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案/">IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案</a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（一） 创建你的第一个三维场景/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">Three.js学习笔记（二）场景（scene）</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  <p>
+  
+  &copy; 2019 John Doe
+  
+  All rights reserved.</p>
+  <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</div>
+<div class="clearfix"></div>
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id='bg'></div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"right","width":200,"height":350},"mobile":{"show":true},"log":false});</script></body>
+</html>

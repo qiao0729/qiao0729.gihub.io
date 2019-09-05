@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>Three.js学习笔记（二）场景（scene） | Hexo</title>
+  <meta name="author" content="John Doe">
+
+  
+  <meta name="description" content="前言场景就是一个容器，可以容纳相机、光源、对象等，所以对场景的深入了解显得尤为重要。本次笔记主要学习：
+
+在Three.js中场景使用的组件
+THREE.Scene对象的作用
+
+一、 创建场景一个场景想要显示任何东西，需要下表所示的三种类型的组件：|组件  | 说明 ||–|–|| 摄像机 |  决">
+  
+
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Three.js学习笔记（二）场景（scene）">
+  <meta property="og:site_name" content="Hexo">
+
+  
+  
+
+  
+    <meta property="og:image" content>
+  
+
+  
+  <link href="/css/images/favicon.ico" rel="icon">
+  
+
+  <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+
+</head>
+</html>
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Hexo</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:48:40.238Z"><a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title">Three.js学习笔记（二）场景（scene）</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>场景就是一个容器，可以容纳相机、光源、对象等，所以对场景的深入了解显得尤为重要。本次笔记主要学习：</p>
+<ol>
+<li>在Three.js中场景使用的组件</li>
+<li>THREE.Scene对象的作用</li>
+</ol>
+<h1 id="一、-创建场景"><a href="#一、-创建场景" class="headerlink" title="一、 创建场景"></a>一、 创建场景</h1><p>一个场景想要显示任何东西，需要下表所示的三种类型的组件：<br>|组件  | 说明 |<br>|–|–|<br>| 摄像机 |  决定屏幕上哪些东西需要渲染|<br>| 光源 |  决定材质如何显示以及用于产生阴影|<br>| 对象 |  摄像机透视图里主要的渲染对象，如球、立方体等|</p>
+<h2 id="二、场景的基本功能"><a href="#二、场景的基本功能" class="headerlink" title="二、场景的基本功能"></a>二、场景的基本功能</h2><p>通过下面一个实例，我们来学习一些和场景相关的方法：</p>
+<ol>
+<li>THREE.Scene.Add：用于向场景中添加对象</li>
+<li>THREE.Scene.Remove：用于移除场景中的对象</li>
+<li>THREE.Scene.children：用于获取场景中所有的子对象列表</li>
+<li>THREE.Scene.traverse：用于操作场景中的所有对象</li>
+</ol>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>scene<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"Three/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"dat.GUI/dat.gui/build/dat.gui.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">  body&#123;</span><br><span class="line">    margin: 0;</span><br><span class="line">    overflow: hidden;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"WebGL-output"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">    var scene;</span><br><span class="line">    var camera;</span><br><span class="line">    var renderer;</span><br><span class="line">    var plane;</span><br><span class="line">  function init()&#123;</span><br><span class="line"></span><br><span class="line">    //定义场景、相机、渲染器</span><br><span class="line">    scene = new THREE.Scene();</span><br><span class="line">    camera = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,1000);</span><br><span class="line">    renderer = new THREE.WebGLRenderer();</span><br><span class="line">    renderer.setSize(window.innerWidth,window.innerHeight);</span><br><span class="line">    renderer.shadowMapEnabled = true;</span><br><span class="line"></span><br><span class="line">    //定义一个平面承载物体</span><br><span class="line">    var planeGeometry = new THREE.PlaneGeometry(60,40,1,1);</span><br><span class="line">    var planeMaterial = new THREE.MeshLambertMaterial(&#123;color:0xffffff&#125;);</span><br><span class="line">        plane = new THREE.Mesh(planeGeometry,planeMaterial);</span><br><span class="line">        plane.receiveShadow = true;</span><br><span class="line"></span><br><span class="line">        plane.position.set(0,0,0);</span><br><span class="line">        plane.rotation.x = -0.5 * Math.PI;</span><br><span class="line">        scene.add(plane);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        camera.position.x = -30;</span><br><span class="line">        camera.position.y = 40;</span><br><span class="line">        camera.position.z = 30;</span><br><span class="line">        camera.lookAt(scene.position);</span><br><span class="line"></span><br><span class="line">    var ambientLight = new THREE.AmbientLight(0x0c0c0c);</span><br><span class="line">        scene.add(ambientLight);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    var spotLight = new THREE.SpotLight(0xffffff);</span><br><span class="line">        spotLight.position.set(-40, 60, -10);</span><br><span class="line">        spotLight.castShadow = true;</span><br><span class="line">        scene.add(spotLight);</span><br><span class="line"></span><br><span class="line">    var controls = new function()&#123;</span><br><span class="line">        this.rotationSpeed = 0.02;</span><br><span class="line">        this.numberOfObjects = scene.children.length;</span><br><span class="line">        this.addCube = function()&#123;</span><br><span class="line">          var cubeSize = Math.ceil(3*Math.random());</span><br><span class="line">          var cubeGeometry = new THREE.CubeGeometry(cubeSize,cubeSize,cubeSize);</span><br><span class="line">          var cubeMaterial = new THREE.MeshLambertMaterial(&#123;color:Math.random()*0xffffff&#125;);</span><br><span class="line">          cube = new THREE.Mesh(cubeGeometry, cubeMaterial);</span><br><span class="line"></span><br><span class="line">          cube.castShadow = true;</span><br><span class="line"></span><br><span class="line">          cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));</span><br><span class="line">          cube.position.y = Math.round((Math.random() * 5));</span><br><span class="line">          cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));</span><br><span class="line"></span><br><span class="line">          scene.add(cube);</span><br><span class="line">          this.numberOfObjects = scene.children.length;</span><br><span class="line">      &#125;;</span><br><span class="line">      this.removeCube = function()&#123;</span><br><span class="line">          var objNumber = scene.children.length;</span><br><span class="line">          var lastObject = scene.children[objNumber - 1];</span><br><span class="line">          if(lastObject instanceof THREE.Mesh)&#123;</span><br><span class="line">            scene.remove(lastObject);</span><br><span class="line">            this.numberOfObjects = scene.children.length;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    var gui = new dat.GUI();</span><br><span class="line">        gui.add(controls,'rotationSpeed',0,1);</span><br><span class="line">        gui.add(controls,'addCube');</span><br><span class="line">        gui.add(controls,'removeCube');</span><br><span class="line">        gui.add(controls,'numberOfObjects').listen();</span><br><span class="line">    </span><br><span class="line">        document.getElementById('WebGL-output').appendChild(renderer.domElement);</span><br><span class="line">        renderScene();</span><br><span class="line"></span><br><span class="line">    function renderScene()&#123;</span><br><span class="line">        requestAnimationFrame(renderScene);</span><br><span class="line">        //让物体动起来</span><br><span class="line">        scene.traverse(function (e) &#123;</span><br><span class="line">        if (e instanceof THREE.Mesh &amp;&amp; e != plane) &#123;</span><br><span class="line">          e.rotation.x += controls.rotationSpeed;</span><br><span class="line">          e.rotation.y += controls.rotationSpeed;</span><br><span class="line">          e.rotation.z += controls.rotationSpeed;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line"></span><br><span class="line">      renderer.render(scene, camera);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">  window.onload = init;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>运行起来发现除了一个平面什么也没有，但其实已经定义了很多个对象，通过点击addCube就可以添加对象。其中用到了scene.add()方法。而另一个方法removeCube()中则用到了scene.remove()方法；而通过scene.children.length则可以获取所有的子对象。<br>而renderScene()函数中使用的scene,.traverse();方法，将一个方法作为参数传递给traverse()方法，这个传递来的方法将会在场景中的每一个子对象上执行。<br><img src="https://img-blog.csdnimg.cn/20190829104733604.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>最终可以实现如下效果：<br><img src="https://img-blog.csdnimg.cn/20190829105727406.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">Recent Posts</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">使用openlayers的扩展插件实现矢量图层的3D渲染</a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Win7系统中如何启用Internet信息服务（IIS）/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案/">IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案</a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（一） 创建你的第一个三维场景/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">Three.js学习笔记（二）场景（scene）</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  <p>
+  
+  &copy; 2019 John Doe
+  
+  All rights reserved.</p>
+  <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</div>
+<div class="clearfix"></div>
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id='bg'></div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"right","width":200,"height":350},"mobile":{"show":true},"log":false});</script></body>
+</html>

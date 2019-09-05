@@ -62,21 +62,300 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2019-09-03T10:57:22.000Z"><a href="/2019/09/03/我的第一篇博客文章/">2019-09-03</a></time>
+        <time datetime="2019-09-05T13:49:24.598Z"><a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">2019-09-05</a></time>
       
       
   
-    <h1 class="title"><a href="/2019/09/03/我的第一篇博客文章/">我的第一篇博客文章</a></h1>
+    <h1 class="title"><a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">使用openlayers的扩展插件实现矢量图层的3D渲染</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <h2 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h2><p>内容</p>
-<hr>
-<p>##第二章<br>内容</p>
-<hr>
-<p>##参考文献<br><a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a></p>
+        <p>@使得openlayers二维地图上的矢量图层具有3D效果</p>
+<h1 id="openlayers简介"><a href="#openlayers简介" class="headerlink" title="openlayers简介"></a>openlayers简介</h1><p>openlayers是一个用于开发WebGIS的客户端的JavaScript包，主要负责GIS数据的展示和交互。在操作方面，OpenLayers 除了可以在浏览器中帮助开发者实现地图浏览的基本效果，比如放大（Zoom In）、缩小（Zoom Out）、平移（Pan）等常用操作之外，还可以进行选取面、选取线、要素选择、图层叠加等不同的操作，甚至可以对已有的OpenLayers 操作和数据支持类型进行扩充，为其赋予更多的功能。例如，它可以为OpenLayers 添加网络处理服务WPS 的操作接口，从而利用已有的空间分析处理服务来对加载的地理空间数据进行计算。同时，在OpenLayers提供的类库当中，它还使用了类库Prototype.js 和Rico 中的部分组件，为地图浏览操作客户端增加Ajax 效果。openlayers是二维的，有旋转的功能，但是没有倾斜的功能，所以在openlayers中让图层倾斜，呈现类似于高德地图和百度地图那样的三维效果实现不了。<br>        <a href="https://openlayers.org/" target="_blank" rel="noopener">openlayers官网链接</a></p>
+<h2 id="openlayersde扩展插件——ol-ext"><a href="#openlayersde扩展插件——ol-ext" class="headerlink" title="openlayersde扩展插件——ol-ext"></a>openlayersde扩展插件——ol-ext</h2><p>ol-ext是一个很cool的openlayers扩展插件。它是一个与openlayers一起使用的具有扩展，控制，交互等功能的一个插件。在用openlayers进行WebGIS的开发过程中遇到一个问题——让加载在openlayers中的一个矢量图层具有立体效果，而不只是一个二维平面。找了非常多的方法，都不能实现，最后找到了这个插件，可以很好的实现，所以写这篇博客希望可以为有此需求的小伙伴解决问题。openlayers还有一些其他的扩展插件，小伙伴们也可以自行百度了解其他相关的插件。也可以看看以下这篇博客<a href="https://blog.csdn.net/weixin_40184249/article/details/80726606" target="_blank" rel="noopener">openlayer扩展插件</a><br><a href="http://viglino.github.io/ol-ext/doc/doc-pages/" target="_blank" rel="noopener">ol-ext官网</a></p>
+<h2 id="ol-ext实现矢量图层的3D渲染"><a href="#ol-ext实现矢量图层的3D渲染" class="headerlink" title="ol-ext实现矢量图层的3D渲染"></a>ol-ext实现矢量图层的3D渲染</h2><p>以下是ol-ext官网中的一个示例，我进行了一部分改动，有需要实现类似效果的小伙伴也可以去ol-ext官网进行更加深入的学习<br><a href="https://github.com/Viglino/ol-ext" target="_blank" rel="noopener">ol-ext</a><br><a href="https://viglino.github.io/ol-ext/examples/map/map.layer.3D.html" target="_blank" rel="noopener">该示例的完整代码</a></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">DOCTYPE</span> <span class="attr">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">	Copyright wangQiaoZi 2019-08-15 </span></span><br><span class="line"><span class="comment">--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">title</span>&gt;</span>Layer 3D<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"2.5D/3D buildings on an OL3 map"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"keywords"</span> <span class="attr">content</span>=<span class="string">"ol3, layer, vector, 3D, buildings, animation"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">&lt;!-- jQuery --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"https://code.jquery.com/jquery-1.11.0.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">&lt;!-- Openlayers --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"https://openlayers.org/en/latest/css/ol.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"https://openlayers.org/en/latest/build/ol.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">&lt;!-- ol-ext --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"../../dist/ol-ext.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"../../dist/ol-ext.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"../style.css"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">		#map </span><br><span class="line">		&#123;	position:fixed;</span><br><span class="line">			top: 4em;</span><br><span class="line">			left: 0;</span><br><span class="line">			right:0;</span><br><span class="line">			bottom:0;</span><br><span class="line">			margin:0;</span><br><span class="line">		&#125;</span><br><span class="line">	<span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> &gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">h1</span>&gt;</span>Layer 3D<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!-- DIV pour la carte --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"map"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line">	// The map</span><br><span class="line">	var map = new ol.Map(&#123;	</span><br><span class="line">            target: 'map',</span><br><span class="line">			view: new ol.View(&#123;	</span><br><span class="line">                zoom: 19,</span><br><span class="line">				center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]</span><br><span class="line">			&#125;),</span><br><span class="line">			//interactions: ol.interaction.defaults(),</span><br><span class="line">			layers: [ new ol.layer.Tile(&#123; name:"OSM", source: new ol.source.OSM() &#125;)]</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">	// Create layer</span><br><span class="line">	var vectorSource = new ol.source.Vector(</span><br><span class="line">	&#123;	url: '../data/ignf.json',</span><br><span class="line">		projection: 'EPSG:3857',</span><br><span class="line">		format: new ol.format.GeoJSON()</span><br><span class="line">	&#125;);</span><br><span class="line">	var vector = new ol.layer.Vector(</span><br><span class="line">		&#123;	source: vectorSource,</span><br><span class="line">		&#125;);</span><br><span class="line">	map.addLayer(vector);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	// Set 3D renderer</span><br><span class="line">	var r3D = new ol.render3D(&#123; height:10, defaultHeight:3.5 &#125;);</span><br><span class="line">	vector.setRender3D(r3D);</span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>效果图：<br><img src="https://img-blog.csdnimg.cn/2019081511213936.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:49:16.774Z"><a href="/2019/09/05/Win7系统中如何启用Internet信息服务（IIS）/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/09/05/Win7系统中如何启用Internet信息服务（IIS）/"></a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <hr>
+<p>title: Win7系统中如何启用Internet信息服务（IIS）<br>—# 怎么样在Win7系统下安装启用IIS</p>
+<p>这一次的博客是用于记录自己平时的工作，根据<a href="https://jingyan.baidu.com/article/ac6a9a5e36977d2b653eacb2.html" target="_blank" rel="noopener">百度经验</a>，在Win7系统下如何安装启用IIS</p>
+<h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><ol>
+<li>打开控制面板，点击程序下方的卸载程序，如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190826094315390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.进入程序和功能界面之后，点击打开或关闭windows功能，如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190826094620604.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>3.点击进入打开或关闭windows功能之后，找到Internet信息服务，将其目录下的FTP服务器、Web管理工具、万维网服务进行勾选，如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190826094915718.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>点击确定之后，开启windows功能需要等待一会，更待更新完成之后，就成功开启了IIS功能；</li>
+<li>在所有程序中搜索iis，点击打开Internet信息服务（IIS）管理器，如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190826095654988.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ol>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:49:05.621Z"><a href="/2019/09/05/IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/09/05/IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案/">IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h2><p>又是一次踩坑之后的记录，上一篇博客记录了windows7中如何启动IIS服务，但是自己启动之后访问默认的网站 Default Web Site 都加载不出来。故开启了我的百度之路。终于找到了<a href="https://blog.csdn.net/sd6275832ght/article/details/81702756" target="_blank" rel="noopener">一篇博客</a>。解决了自己的问题，特此记录，希望帮助大家少踩坑。</p>
+<h2 id="解决方法及步骤"><a href="#解决方法及步骤" class="headerlink" title="解决方法及步骤"></a>解决方法及步骤</h2><p>刚开始访问默认的网站一直报错，停止之后又重新启动，依然还是报错。</p>
+<p><img src="https://img-blog.csdnimg.cn/20190826164456969.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>找到应用程序池，点击进去，发现尽管我启动了 网站，但是在应用程序池中的状态是停止状态。<br><img src="https://img-blog.csdnimg.cn/20190826164646568.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>对于部署之后访问报错<strong>Service Unavailable HTTP Error 503. The service is unavailable</strong>的网站，在应用程序池中，鼠标右键选择高级设置，修改其标识为 <strong>NetworkService</strong>,如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190826164953919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>至此，再重新启动报错的网站，点击浏览，就可以正常访问了。非常感谢<a href="https://blog.csdn.net/sd6275832ght/article/details/81702756" target="_blank" rel="noopener">大佬</a>提供的解决方案。</p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:48:52.326Z"><a href="/2019/09/05/Three.js学习笔记（一） 创建你的第一个三维场景/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/09/05/Three.js学习笔记（一） 创建你的第一个三维场景/"></a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <hr>
+<p>title: Three.js学习笔记（一） 创建你的第一个三维场景<br>—# 前言</p>
+<p>最近在学习Three.js，就记录一下自己的学习过程，做做笔记。本次笔记主要介绍如何使用three.js实现一个三维场景。主要实现的功能有：</p>
+<ol>
+<li>创建一个Three.js场景</li>
+<li>使用材质、光源、动画来完善第一个场景</li>
+<li>引入辅助库以统计和控制场景</li>
+</ol>
+<h1 id="一、-创建一个Three-js场景"><a href="#一、-创建一个Three-js场景" class="headerlink" title="一、 创建一个Three.js场景"></a>一、 创建一个Three.js场景</h1><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>Three 1-1<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 引入three.js --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"Three/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">    /* 使得场景占满全屏 */</span><br><span class="line">    body&#123;</span><br><span class="line">      margin: 0;</span><br><span class="line">      overflow: hidden;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 承载输出的div --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"WebGL-output"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    var scene;</span><br><span class="line">    var camera;</span><br><span class="line">    var renderer;</span><br><span class="line"></span><br><span class="line">  function init()&#123;</span><br><span class="line">  	//场景</span><br><span class="line">    var scene = new THREE.Scene();</span><br><span class="line">    //相机</span><br><span class="line">    var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);</span><br><span class="line">    //渲染器</span><br><span class="line">    var renderer = new THREE.WebGLRenderer();</span><br><span class="line"></span><br><span class="line">    renderer.setSize(window.innerWidth, window.innerHeight);</span><br><span class="line"></span><br><span class="line">    //添加平面</span><br><span class="line">    var planeGeometry = new THREE.PlaneGeometry(60,20,1,1);</span><br><span class="line">    var planeMaterial = new THREE.MeshBasicMaterial(&#123;color:0xcccccc&#125;);</span><br><span class="line">    var plane = new THREE.Mesh(planeGeometry,planeMaterial);</span><br><span class="line"></span><br><span class="line">    //设置平面的位置</span><br><span class="line">    plane.rotation.x = -0.5*Math.PI;</span><br><span class="line">    plane.position.set(15,0,0);</span><br><span class="line"></span><br><span class="line">    scene.add(plane);</span><br><span class="line">    </span><br><span class="line">    //添加一个立方体</span><br><span class="line">    var cubeGeometry = new THREE.BoxGeometry(4,4,4,4,4,4);</span><br><span class="line">    var cubeMaterial = new THREE.MeshBasicMaterial(&#123;color:0xff0000, wireframe: true&#125;);</span><br><span class="line">    var cube = new THREE.Mesh(cubeGeometry,cubeMaterial);</span><br><span class="line">    cube.position.set(-10,10,5);</span><br><span class="line">    </span><br><span class="line">    scene.add(cube);</span><br><span class="line">	//添加一个球</span><br><span class="line">    var sphereGeometry = new THREE.SphereGeometry(4,20,20);</span><br><span class="line">    var sphereMaterial = new THREE.MeshBasicMaterial(&#123;color:0x7777ff, wireframe: true&#125;);</span><br><span class="line">    var sphere = new THREE.Mesh(sphereGeometry,sphereMaterial);</span><br><span class="line">    sphere.position.set(20,5,2);</span><br><span class="line">    scene.add(sphere);</span><br><span class="line">   </span><br><span class="line">    camera.position.set(-30,40,20);</span><br><span class="line">    camera.lookAt(scene.position);</span><br><span class="line">    document.getElementById('WebGL-output').appendChild(renderer.domElement);</span><br><span class="line">    renderer.render(scene,camera);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  window.onload = init;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在创建一个三维场景时，场景（scene）、相机（camera）、渲染器（renderer）是缺一不可的。<br><code>var scene = new THREE.Scene();</code>定义了场景，场景是一个容器，其实更多的时候我将其想象成一个舞台。没有舞台也就不会有光鲜亮丽的演员呈现在我们眼前。<br><code>var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);</code>定义了相机，相机则决定了我们能看到场景中的什么东西，我会将其想象为你在电视前看一场直播，摄像机拍到了什么你便在电视荧幕前看到了什么。<br><code>var renderer = new THREE.WebGLRenderer();</code>定义看渲染器，渲染器则会根据相机的参数设置来计算对象在浏览器中会渲染成什么样子。我会将其想象成不同的设置的摄像机拍出来的照片效果自然不同。<br>以上的想象比喻只是为了自己可以更加直观的理解，如有什么不妥之处，望大家提出来一起进步。以上的代码运行起来效果如下：<br><img src="https://img-blog.csdnimg.cn/20190828143316315.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h1 id="二、添加材质、光源和阴影效果并且让物体动起来"><a href="#二、添加材质、光源和阴影效果并且让物体动起来" class="headerlink" title="二、添加材质、光源和阴影效果并且让物体动起来"></a>二、添加材质、光源和阴影效果并且让物体动起来</h1><p>上一个实例中只是简单的添加的在一个平面上添加了一个立方体和一个球。并没有任何的效果，看起来比较单调。接下来我们将物体的材质进行修改，并添加光源使其产生阴影效果，并在渲染器进行渲染时让立方体和球体动起来。先上代码吧：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>Three 1-2<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 引入three.js--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"Three/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">    /* 使得场景占满全屏 */</span><br><span class="line">    body &#123;</span><br><span class="line">      margin: 0;</span><br><span class="line">      overflow: hidden;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 承载输出的div --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"WebGL-output"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">    var scene;</span><br><span class="line">    var camera;</span><br><span class="line">    var renderer;</span><br><span class="line">    var stats;</span><br><span class="line"></span><br><span class="line">    function init() &#123;</span><br><span class="line">       scene = new THREE.Scene();</span><br><span class="line">       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);</span><br><span class="line">       renderer = new THREE.WebGLRenderer();</span><br><span class="line">      </span><br><span class="line">      renderer.shadowMapEnabled = true; //告诉渲染器渲染阴影</span><br><span class="line">      renderer.setSize(window.innerWidth, window.innerHeight);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      //添加一个平面、球、立方体</span><br><span class="line">      var planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);</span><br><span class="line">      var planeMaterial = new THREE.MeshLambertMaterial(&#123;</span><br><span class="line">        color: 0xcccccc</span><br><span class="line">      &#125;);</span><br><span class="line">      var plane = new THREE.Mesh(planeGeometry, planeMaterial);</span><br><span class="line">      plane.receiveShadow = true;</span><br><span class="line">      </span><br><span class="line">      //设置平面的位置</span><br><span class="line">      plane.rotation.x = -0.5 * Math.PI;</span><br><span class="line">      plane.position.set(15, 0, 0);</span><br><span class="line">      scene.add(plane);</span><br><span class="line"></span><br><span class="line">      var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);</span><br><span class="line">      var cubeMaterial = new THREE.MeshLambertMaterial(&#123;</span><br><span class="line">        color: 0xff0000</span><br><span class="line">      &#125;);</span><br><span class="line">      var cube = new THREE.Mesh(cubeGeometry,cubeMaterial);</span><br><span class="line">      cube.position.set(-4, 3, 0);</span><br><span class="line">      cube.castShadow = true;</span><br><span class="line">      scene.add(cube);</span><br><span class="line"></span><br><span class="line">      var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);</span><br><span class="line">      var sphereMaterial = new THREE.MeshLambertMaterial(&#123;</span><br><span class="line">        color: 0x7777ff</span><br><span class="line">      &#125;);</span><br><span class="line">      var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);</span><br><span class="line">      sphere.position.set(20, 0, 2);</span><br><span class="line">      sphere.castShadow = true;</span><br><span class="line">      scene.add(sphere);</span><br><span class="line"></span><br><span class="line">      camera.position.set(-30, 40, 30);</span><br><span class="line">      camera.lookAt(scene.position);</span><br><span class="line"></span><br><span class="line">      // 添加点电源</span><br><span class="line">      var spotLight = new THREE.SpotLight(0xffffff);</span><br><span class="line">      spotLight.position.set(-40, 60, -10);</span><br><span class="line">      spotLight.castShadow = true;</span><br><span class="line">      scene.add(spotLight);</span><br><span class="line"></span><br><span class="line">      document.getElementById('WebGL-output').appendChild(renderer.domElement);</span><br><span class="line">      renderScene();</span><br><span class="line">      </span><br><span class="line">      var step = 0;</span><br><span class="line">      function renderScene() &#123;</span><br><span class="line">        cube.rotation.x += 0.02;</span><br><span class="line">        cube.rotation.y += 0.02;</span><br><span class="line">        cube.rotation.z += 0.02;</span><br><span class="line">        step+=0.04;</span><br><span class="line">        sphere.position.x = 10+(5*(Math.cos(step)));</span><br><span class="line">        sphere.position.y = 10+(5*Math.abs(Math.sin(step)));</span><br><span class="line">        requestAnimationFrame(renderScene);</span><br><span class="line">        renderer.render(scene, camera);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    window.onload = init;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>我们将物体的材质从MeshBasicMaterial换成了MeshLambertMaterial。因为在Three.js中MeshLambertMaterial<br>和MeshPhongMaterial这两种材质在渲染时才会对光源产生反应。</p>
+</li>
+<li><p>改变材质之后还需要添加光源才能产生阴影，在此示例中我们添加了一个聚光灯光源<code>var spotLight = new
+THREE.SpotLight(0xffffff);</code>    随着之后的学习也会学习Three.js中的光源，到时候再进行详细的介绍。</p>
+</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20190828145011869.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p> 但是改变了材质，添加了光源之后此时运行程序你会发现并没有阴影效果；我们还需要进行以下操作：</p>
+<p> 1.告诉渲染器在渲染物体的时候渲染阴影:<code>renderer.shadowMapEnabled = true;</code><br> 2.指定哪一个物体接收阴影，在本示例中，接收阴影的即为平面:<code>plane.receiveShadow = true;</code><br> 3.指定哪一个物体产生阴影，在本示例中，产生阴影的即为立方体和球体:<code>cube.castShadow = true; sphere.castShadow = true;</code>这时就会有了阴影的效果了。<br>接下来我们将会给立方体和球添加一个简单的动画效果。我们需要引入requestAnimationFrame() 方法，该方法可以使浏览器在特定的时间间隔重新渲染场景。我们在不断的进行渲染<code>requestAnimationFrame(renderScene);</code>，在渲染时不断地改变物体的位置就可以产生一种动画效果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cube.rotation.x += 0.02;</span><br><span class="line">      cube.rotation.y += 0.02;</span><br><span class="line">      cube.rotation.z += 0.02;</span><br><span class="line">      step+=0.04;</span><br><span class="line">      sphere.position.x = 10+(5*(Math.cos(step)));</span><br><span class="line">      sphere.position.y = 10+(5*Math.abs(Math.sin(step)));</span><br></pre></td></tr></table></figure>
+
+<p>本示例中让立方体不断的旋转，小球则是改变其x,y的值让其产生弹跳的效果。<br><img src="https://img-blog.csdnimg.cn/20190828151054278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="三、引用stats和dat-gui辅助库对场景进行统计和控制"><a href="#三、引用stats和dat-gui辅助库对场景进行统计和控制" class="headerlink" title="三、引用stats和dat.gui辅助库对场景进行统计和控制"></a>三、引用stats和dat.gui辅助库对场景进行统计和控制</h2><p>stats主要用于检测动画运行时的帧数，在动画运行时，该库可以在一个图片中显示画面每秒传输帧数。使用步骤如下：</p>
+<ol>
+<li>引入stats<code>&lt;script src=&quot;dat.GUI/dat.gui/build/dat.gui.js&quot;&gt;&lt;/script&gt;</code></li>
+<li>添加div元素用于显示统计图形<code>&lt;div id=&quot;stasOut&quot;&gt;&lt;/div&gt;</code></li>
+<li>初始化统计对象，并添加到div中</li>
+</ol>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function initStats()&#123;</span><br><span class="line">       stats = new Stats();</span><br><span class="line">       stats.setMode(0);</span><br><span class="line">       stats.domElement.style.position='absolute';</span><br><span class="line">       stats.domElement.style.top='0px';</span><br><span class="line">       stats.domElement.style.left='0px';</span><br><span class="line">       document.getElementById('stasOut').appendChild(stats.domElement);</span><br><span class="line">       return stats;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>在init中调用initStats();并在渲染时更新<code>stats.updata();</code></li>
+</ol>
+<p> dat.GUI可以使得我们能够在运行期间修改属性，找到最适合的值。其使用步骤如下：</p>
+<ol>
+<li><p>引入dat.gui<code>&lt;script
+src=&quot;dat.GUI/dat.gui/build/dat.gui.js&quot;&gt;&lt;/script&gt;</code> </p>
+</li>
+<li><p>定义一个对象，申明可以通过dat.gui改变的属性值</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var controls = new function()&#123;</span><br><span class="line">        this.rotationSpeed = 0.02;</span><br><span class="line">        this.bouncingSpeed = 0.04;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>将这个javaScript对象传给dat,gui对象，并设置属性的取值范围</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var gui = new dat.GUI();</span><br><span class="line">      gui.add(controls,&apos;rotationSpeed&apos;,0,0.5).step(0.01);</span><br><span class="line">      gui.add(controls,&apos;bouncingSpeed&apos;,0,0.5).step(0.01);</span><br></pre></td></tr></table></figure>
+
+<p> 在渲染时直接引用这些属性。当改变这些属性值是，就会产生不同的效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">function renderScene() &#123;</span><br><span class="line">       stats.update();</span><br><span class="line">       cube.rotation.x += controls.rotationSpeed;</span><br><span class="line">       cube.rotation.y += controls.rotationSpeed;</span><br><span class="line">       cube.rotation.z += controls.rotationSpeed;</span><br><span class="line">       step+= controls.bouncingSpeed;</span><br><span class="line">       sphere.position.x = 10+(5*(Math.cos(step)));</span><br><span class="line">       sphere.position.y = 10+(5*Math.abs(Math.sin(step)));</span><br><span class="line">       requestAnimationFrame(renderScene);</span><br><span class="line">       renderer.render(scene, camera);</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照使用步骤将代码添加到第二部分的代码中，效果如下：<br><img src="https://img-blog.csdnimg.cn/20190828153153911.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:48:40.238Z"><a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">Three.js学习笔记（二）场景（scene）</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>场景就是一个容器，可以容纳相机、光源、对象等，所以对场景的深入了解显得尤为重要。本次笔记主要学习：</p>
+<ol>
+<li>在Three.js中场景使用的组件</li>
+<li>THREE.Scene对象的作用</li>
+</ol>
+<h1 id="一、-创建场景"><a href="#一、-创建场景" class="headerlink" title="一、 创建场景"></a>一、 创建场景</h1><p>一个场景想要显示任何东西，需要下表所示的三种类型的组件：<br>|组件  | 说明 |<br>|–|–|<br>| 摄像机 |  决定屏幕上哪些东西需要渲染|<br>| 光源 |  决定材质如何显示以及用于产生阴影|<br>| 对象 |  摄像机透视图里主要的渲染对象，如球、立方体等|</p>
+<h2 id="二、场景的基本功能"><a href="#二、场景的基本功能" class="headerlink" title="二、场景的基本功能"></a>二、场景的基本功能</h2><p>通过下面一个实例，我们来学习一些和场景相关的方法：</p>
+<ol>
+<li>THREE.Scene.Add：用于向场景中添加对象</li>
+<li>THREE.Scene.Remove：用于移除场景中的对象</li>
+<li>THREE.Scene.children：用于获取场景中所有的子对象列表</li>
+<li>THREE.Scene.traverse：用于操作场景中的所有对象</li>
+</ol>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>scene<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"Three/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"dat.GUI/dat.gui/build/dat.gui.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">  body&#123;</span><br><span class="line">    margin: 0;</span><br><span class="line">    overflow: hidden;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"WebGL-output"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">    var scene;</span><br><span class="line">    var camera;</span><br><span class="line">    var renderer;</span><br><span class="line">    var plane;</span><br><span class="line">  function init()&#123;</span><br><span class="line"></span><br><span class="line">    //定义场景、相机、渲染器</span><br><span class="line">    scene = new THREE.Scene();</span><br><span class="line">    camera = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,1000);</span><br><span class="line">    renderer = new THREE.WebGLRenderer();</span><br><span class="line">    renderer.setSize(window.innerWidth,window.innerHeight);</span><br><span class="line">    renderer.shadowMapEnabled = true;</span><br><span class="line"></span><br><span class="line">    //定义一个平面承载物体</span><br><span class="line">    var planeGeometry = new THREE.PlaneGeometry(60,40,1,1);</span><br><span class="line">    var planeMaterial = new THREE.MeshLambertMaterial(&#123;color:0xffffff&#125;);</span><br><span class="line">        plane = new THREE.Mesh(planeGeometry,planeMaterial);</span><br><span class="line">        plane.receiveShadow = true;</span><br><span class="line"></span><br><span class="line">        plane.position.set(0,0,0);</span><br><span class="line">        plane.rotation.x = -0.5 * Math.PI;</span><br><span class="line">        scene.add(plane);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        camera.position.x = -30;</span><br><span class="line">        camera.position.y = 40;</span><br><span class="line">        camera.position.z = 30;</span><br><span class="line">        camera.lookAt(scene.position);</span><br><span class="line"></span><br><span class="line">    var ambientLight = new THREE.AmbientLight(0x0c0c0c);</span><br><span class="line">        scene.add(ambientLight);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    var spotLight = new THREE.SpotLight(0xffffff);</span><br><span class="line">        spotLight.position.set(-40, 60, -10);</span><br><span class="line">        spotLight.castShadow = true;</span><br><span class="line">        scene.add(spotLight);</span><br><span class="line"></span><br><span class="line">    var controls = new function()&#123;</span><br><span class="line">        this.rotationSpeed = 0.02;</span><br><span class="line">        this.numberOfObjects = scene.children.length;</span><br><span class="line">        this.addCube = function()&#123;</span><br><span class="line">          var cubeSize = Math.ceil(3*Math.random());</span><br><span class="line">          var cubeGeometry = new THREE.CubeGeometry(cubeSize,cubeSize,cubeSize);</span><br><span class="line">          var cubeMaterial = new THREE.MeshLambertMaterial(&#123;color:Math.random()*0xffffff&#125;);</span><br><span class="line">          cube = new THREE.Mesh(cubeGeometry, cubeMaterial);</span><br><span class="line"></span><br><span class="line">          cube.castShadow = true;</span><br><span class="line"></span><br><span class="line">          cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));</span><br><span class="line">          cube.position.y = Math.round((Math.random() * 5));</span><br><span class="line">          cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));</span><br><span class="line"></span><br><span class="line">          scene.add(cube);</span><br><span class="line">          this.numberOfObjects = scene.children.length;</span><br><span class="line">      &#125;;</span><br><span class="line">      this.removeCube = function()&#123;</span><br><span class="line">          var objNumber = scene.children.length;</span><br><span class="line">          var lastObject = scene.children[objNumber - 1];</span><br><span class="line">          if(lastObject instanceof THREE.Mesh)&#123;</span><br><span class="line">            scene.remove(lastObject);</span><br><span class="line">            this.numberOfObjects = scene.children.length;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    var gui = new dat.GUI();</span><br><span class="line">        gui.add(controls,'rotationSpeed',0,1);</span><br><span class="line">        gui.add(controls,'addCube');</span><br><span class="line">        gui.add(controls,'removeCube');</span><br><span class="line">        gui.add(controls,'numberOfObjects').listen();</span><br><span class="line">    </span><br><span class="line">        document.getElementById('WebGL-output').appendChild(renderer.domElement);</span><br><span class="line">        renderScene();</span><br><span class="line"></span><br><span class="line">    function renderScene()&#123;</span><br><span class="line">        requestAnimationFrame(renderScene);</span><br><span class="line">        //让物体动起来</span><br><span class="line">        scene.traverse(function (e) &#123;</span><br><span class="line">        if (e instanceof THREE.Mesh &amp;&amp; e != plane) &#123;</span><br><span class="line">          e.rotation.x += controls.rotationSpeed;</span><br><span class="line">          e.rotation.y += controls.rotationSpeed;</span><br><span class="line">          e.rotation.z += controls.rotationSpeed;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line"></span><br><span class="line">      renderer.render(scene, camera);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">  window.onload = init;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>运行起来发现除了一个平面什么也没有，但其实已经定义了很多个对象，通过点击addCube就可以添加对象。其中用到了scene.add()方法。而另一个方法removeCube()中则用到了scene.remove()方法；而通过scene.children.length则可以获取所有的子对象。<br>而renderScene()函数中使用的scene,.traverse();方法，将一个方法作为参数传递给traverse()方法，这个传递来的方法将会在场景中的每一个子对象上执行。<br><img src="https://img-blog.csdnimg.cn/20190829104733604.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>最终可以实现如下效果：<br><img src="https://img-blog.csdnimg.cn/20190829105727406.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href='javascript:void(0)' class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-09-05T13:43:57.808Z"><a href="/2019/09/05/使用node.js快速搭建本地服务器/">2019-09-05</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/09/05/使用node.js快速搭建本地服务器/">使用node.js快速搭建本地服务器</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在学习Three.js的过程中，一般的功能可以通过编写代码之后直接运行html文件即可。但是在需要下载外部资源时，比如模型或者纹理图像，那么直接运行html代码是不行的，所以需要安装一个本地服务器。接下来我就来介绍一下如何用node.js搭建一个本地服务器。</p>
+<h2 id="一、安装node-js"><a href="#一、安装node-js" class="headerlink" title="一、安装node.js"></a>一、安装node.js</h2><p>先到<a href="https://nodejs.org/en/" target="_blank" rel="noopener">node官网</a>或者<a href="http://nodejs.cn/" target="_blank" rel="noopener">node中文网</a>，下载并安装好node，安装好后可进入cmd输入node -v验证是否安装成功。如下图所示即为安装成功：<br><img src="https://img-blog.csdnimg.cn/20190830114949416.png" alt="在这里插入图片描述"></p>
+<h2 id="二、安装anywhere"><a href="#二、安装anywhere" class="headerlink" title="二、安装anywhere"></a>二、安装anywhere</h2><p>安装了anywhere之后可以在任意目录启动一个静态服务器：<br><img src="https://img-blog.csdnimg.cn/20190830115338694.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>安装好node之后，打开cmd 输入npm install anywhere -g安装anywhere,成功之后如下图所示：<br><img src="https://img-blog.csdnimg.cn/20190830115557254.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="三、如何使用"><a href="#三、如何使用" class="headerlink" title="三、如何使用"></a>三、如何使用</h2><p>搭建好之后如何使用呢：</p>
+<ol>
+<li>在cmd页面，找到想要搭建服务器的路径，然后在该路径下输入 anywhere 8860,然后浏览器就会自动打开本地访问网址，一个简单的node服务器就搭建好了。<br><img src="https://img-blog.csdnimg.cn/20190830115952242.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20190830120000758.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>可以在vs code的终端输入anywhere 8860进行一个简单node服务器的搭建<br><img src="https://img-blog.csdnimg.cn/20190830120408290.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5NjAyMzQ3,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ol>
 
       
     </div>
@@ -169,11 +448,23 @@
   <ul class="entry">
     
       <li>
-        <a href="/2019/09/03/我的第一篇博客文章/">我的第一篇博客文章</a>
+        <a href="/2019/09/05/使用openlayers的扩展插件实现矢量图层的3D渲染/">使用openlayers的扩展插件实现矢量图层的3D渲染</a>
       </li>
     
       <li>
-        <a href="/2019/09/03/hello-world/">Hello World</a>
+        <a href="/2019/09/05/Win7系统中如何启用Internet信息服务（IIS）/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案/">IIS部署本地HTML文件时报错Service Unavailable HTTP Error 503. The service is unavailable.的解决方案</a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（一） 创建你的第一个三维场景/"></a>
+      </li>
+    
+      <li>
+        <a href="/2019/09/05/Three.js学习笔记（二）场景（scene）/">Three.js学习笔记（二）场景（scene）</a>
       </li>
     
   </ul>
